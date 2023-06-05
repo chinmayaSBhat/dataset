@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CSV to HTML Table with Pagination</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.1.0/papaparse.min.js"></script>
+  <style>
+    .pagination-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">CSV Table</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+        </li>
+      </ul>
+      <form class="form-inline ml-auto">
+        <input type="text" class="form-control mr-sm-2" id="searchInput" placeholder="Enter search term">
+        <button class="btn btn-outline-light my-2 my-sm-0" id="searchButton">Search</button>
+      </form>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <table class="table">
+      <thead>
+        <tr>
+          <!-- Table headers will be added dynamically -->
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Table rows will be added dynamically -->
+      </tbody>
+    </table>
+    <div id="paginationContainer" class="pagination-container">
+      <!-- Pagination links will be added dynamically -->
+    </div>
+  </div>
+
+  <script>
+   function generateTable(csvFile) {
+  Papa.parse(csvFile, {
+    download: true,
+    complete: function(results) {
+      var tableData = results.data;
+      var table = document.querySelector('.table');
+      var tbody = table.querySelector('tbody');
+      var headers = tableData[0];
+
+      // Generate table headers
+      var headerRow = document.createElement('tr');
+      headers.forEach(function(header) {
+        var th = document.createElement('th');
+        th.textContent = header;
+        headerRow.appendChild(th);
+      });
+      table.querySelector('thead').appendChild(headerRow);
+
+      // Generate table rows
+      for (var i = 1; i < tableData.length; i++) {
+        var rowData = tableData[i];
+        var row = document.createElement('tr');
+        rowData.forEach(function(cellData) {
+          var cell = document.createElement('td');
+          cell.textContent = cellData;
+          row.appendChild(cell);
+        });
+        tbody.appendChild(row);
+      }
+
+      // Initialize pagination variables
+      var rows = Array.from(tbody.querySelectorAll('tr'));
+      var perPage = 50;
+      var totalPages = Math.ceil(rows.length / perPage);
+      var currentPage = 1;
+
+      // Display initial rows
+      displayRows(currentPage);
+
+      // Generate pagination links
+      var paginationContainer = document.getElementById('paginationContainer');
+      var paginationLinks = '';
+
+      for (var page = 1; page <= totalPages; page++) {
+        paginationLinks += '<a class="page-link" href="#" data-page="' + page + '">' + page + '</a>';
+      }
+
+      paginationContainer.innerHTML = paginationLinks;
+
+      // Handle pagination link clicks
+      var paginationLinks = paginationContainer.querySelectorAll('.page-link');
+
+      paginationLinks.forEach(function(link) {
+        link.addEventListener('click', function(event) {
+          event.preventDefault();
+          currentPage = parseInt(this.getAttribute('data-page'));
+          displayRows(currentPage);
+
+          paginationLinks.forEach(function(link) {
+            link.classList.remove('active');
+          });
+          this.classList.add('active');
+        });
+      });
+
+      // Function to display rows for the given page
+      function displayRows(page) {
+        var start = (page - 1) * perPage;
+        var end = start + perPage;
+
+        rows.forEach(function(row, index) {
+          if (index >= start && index < end) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      }
+    }
+  });
+}
+
+
+    // Call the function to generate the table
+    generateTable('./data_file.csv');
+
+    // Search functionality
+    document.getElementById('searchButton').addEventListener('click', function(event) {
+      event.preventDefault(); // Prevent form submission
+      var searchInput = document.getElementById('searchInput').value.toLowerCase();
+      var rows = document.querySelectorAll('.table tbody tr');
+
+      rows.forEach(function(row) {
+        var cells = row.querySelectorAll('td');
+        var found = false;
+
+        cells.forEach(function(cell) {
+          if (cell.textContent.toLowerCase().indexOf(searchInput) > -1) {
+            found = true;
+          }
+        });
+
+        if (found) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
