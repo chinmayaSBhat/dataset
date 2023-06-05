@@ -58,7 +58,7 @@
       var tbody = table.querySelector('tbody');
       var headers = tableData[0];
 
-      // Generate table headers
+
       var headerRow = document.createElement('tr');
       headers.forEach(function(header) {
         var th = document.createElement('th');
@@ -67,7 +67,6 @@
       });
       table.querySelector('thead').appendChild(headerRow);
 
-      // Generate table rows
       for (var i = 1; i < tableData.length; i++) {
         var rowData = tableData[i];
         var row = document.createElement('tr');
@@ -79,16 +78,14 @@
         tbody.appendChild(row);
       }
 
-      // Initialize pagination variables
+
       var rows = Array.from(tbody.querySelectorAll('tr'));
       var perPage = 50;
       var totalPages = Math.ceil(rows.length / perPage);
       var currentPage = 1;
 
-      // Display initial rows
       displayRows(currentPage);
 
-      // Generate pagination links
       var paginationContainer = document.getElementById('paginationContainer');
       var paginationLinks = '';
 
@@ -114,7 +111,6 @@
         });
       });
 
-      // Function to display rows for the given page
       function displayRows(page) {
         var start = (page - 1) * perPage;
         var end = start + perPage;
